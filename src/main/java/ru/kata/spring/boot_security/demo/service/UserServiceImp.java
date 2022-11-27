@@ -10,8 +10,6 @@ import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.repository.UserRepository;
 import ru.kata.spring.boot_security.demo.security.UserDetails;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.util.List;
 import java.util.Optional;
 
@@ -91,13 +89,4 @@ public class UserServiceImp implements UserService, UserDetailsService {
         }
         return new ru.kata.spring.boot_security.demo.security.UserDetails(user.get());
     }
-
-//    @Override
-//    @Transactional
-//    public void addUsers() {
-//        userDAO.add(new User("Иван", "Иванов", "ivanoff@mail.ru"));
-//        userDAO.add(new User("Петр", "Петров", "petr94@ya.ru"));
-//        userDAO.add(new User("Александр", "Сидоров", "SidAlex@mail.ru"));
-//        userDAO.add(new User("Семен", "Семенов", "semsem99@ya.ru"));
-//    }
 }
