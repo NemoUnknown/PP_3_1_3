@@ -69,7 +69,7 @@ public class AdminController {
     public String changeForm(Model model, @PathVariable(name = "id") Long id) {
         User user = userService.findById(id);
         model.addAttribute("user", user);
-        model.addAttribute("listRoles", roleService.getRoles());
+        model.addAttribute("roles", roleService.getRoles());
         return "change";
     }
 
