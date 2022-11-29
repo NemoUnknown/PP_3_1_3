@@ -1,6 +1,5 @@
 package ru.kata.spring.boot_security.demo.model;
 
-import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.Id;
@@ -14,7 +13,6 @@ import javax.persistence.ManyToMany;
 import java.util.List;
 
 @Entity
-@Data
 @Table(name = "roles")
 public class Role implements GrantedAuthority {
     @Id
@@ -30,11 +28,35 @@ public class Role implements GrantedAuthority {
     public Role() {
     }
 
-    public Role(String role) {
-        if (!role.startsWith("ROLE_")) {
-            role = "ROLE_" + role;
+    public Role(String roleName) {
+        if (!roleName.startsWith("ROLE_")) {
+            roleName = "ROLE_" + roleName;
         }
-        setRoleName(role);
+        this.roleName = roleName;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getRoleName() {
+        return roleName;
+    }
+
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
+    }
+
+    public List<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(List<User> users) {
+        this.users = users;
     }
 
     @Override
