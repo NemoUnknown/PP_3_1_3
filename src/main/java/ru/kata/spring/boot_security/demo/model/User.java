@@ -5,7 +5,6 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 
-import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -13,7 +12,6 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 
-@Data
 @Entity
 @Table(name = "users")
 public class User implements UserDetails {
