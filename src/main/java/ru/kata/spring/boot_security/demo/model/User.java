@@ -1,5 +1,6 @@
 package ru.kata.spring.boot_security.demo.model;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -11,7 +12,6 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 
@@ -19,8 +19,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -39,35 +39,27 @@ public class User implements UserDetails {
     @Size(min = 4, message = "Пароль должен быть не менее 4-х знаков")
     private String password;
 
-    @Transient
-    private String confirmPassword;
-
-    @Column(name = "name")
+    @Column(name = "first_name")
     private String firstName;
 
     @Column(name = "last_name")
     private String lastName;
 
-    @Email(message = "Ввод в формате адреса электронной почты")
-    @Column(name = "email")
-    private String email;
-
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "users_roles",
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "roles_id"))
-    private Set<Role> roles;
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private List<Role> roles;
 
     public User() {
     }
 
-    public User(String username, String password, String firstName, String lastName, String email, Set<Role> roles) {
+    public User(String username, String password, String firstName, String lastName, List<Role> roles) {
         this.username = username;
         this.password = password;
 
         this.firstName = firstName;
         this.lastName = lastName;
-        this.email = email;
         this.roles = roles;
     }
 
@@ -93,14 +85,6 @@ public class User implements UserDetails {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 
     @Override
@@ -145,19 +129,12 @@ public class User implements UserDetails {
         this.password = password;
     }
 
-    public String getConfirmPassword() {
-        return confirmPassword;
-    }
 
-    public void setConfirmPassword(String confirmPassword) {
-        this.confirmPassword = confirmPassword;
-    }
-
-    public Set<Role> getRoles() {
+    public List<Role> getRoles() {
         return roles;
     }
 
-    public void setRoles(Set<Role> roles) {
+    public void setRoles(List<Role> roles) {
         this.roles = roles;
     }
 
@@ -167,13 +144,12 @@ public class User implements UserDetails {
                 "id=" + id +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
-                ", email='" + email + '\'' +
                 '}';
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(firstName, lastName, email);
+        return Objects.hash(firstName, lastName);
     }
 
     @Override
@@ -181,7 +157,7 @@ public class User implements UserDetails {
         if (this == obj) return true;
         if (!(obj instanceof User)) return false;
         User user = (User) obj;
-        return firstName.equals(user.firstName) && lastName.equals(user.lastName) && email.equals(user.email);
+        return firstName.equals(user.firstName) && lastName.equals(user.lastName);
     }
 
 

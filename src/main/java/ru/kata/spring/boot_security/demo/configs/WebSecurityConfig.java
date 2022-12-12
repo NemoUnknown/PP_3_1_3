@@ -28,17 +28,31 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers("/admin/**", "/edit/**", "/new/**").hasRole("ADMIN")
-                .antMatchers("/", "/index", "/error").permitAll()
+                .antMatchers("/", "/login").permitAll()
+                .antMatchers("/admin/**").hasRole("ADMIN")
                 .antMatchers("/user/**").hasAnyRole("USER", "ADMIN")
-                .anyRequest().hasRole("ADMIN")
+                .anyRequest().authenticated()
                 .and()
                 .formLogin().successHandler(successUserHandler)
                 .permitAll()
                 .and()
-                .logout().logoutUrl("/logout")//
-                .logoutSuccessUrl("/");
+                .logout().logoutUrl("/logout")
+                .logoutSuccessUrl("/login");
 
+    }
+
+//    @Bean
+//    public DaoAuthenticationProvider DaoAuthenticationProvider() {
+//        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+//        authenticationProvider.setPasswordEncoder(passwordEncoder());
+//        authenticationProvider.setUserDetailsService(userService);
+//        authenticationProvider.setHideUserNotFoundExceptions(false);
+//        return authenticationProvider;
+//    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(12);
     }
 
     @Override
@@ -49,9 +63,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         auth.authenticationProvider(provider);
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-//        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-        return new BCryptPasswordEncoder(12);
-    }
+//    @Autowired
+//    protected void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+//
+//        auth
+//                .userDetailsService(userService)
+//                .passwordEncoder(passwordEncoder());
+//    }
+
 }

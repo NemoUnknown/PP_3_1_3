@@ -1,45 +1,46 @@
 package ru.kata.spring.boot_security.demo.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.kata.spring.boot_security.demo.dao.UserDAO;
 import ru.kata.spring.boot_security.demo.model.User;
-import ru.kata.spring.boot_security.demo.repository.UserRepository;
-import ru.kata.spring.boot_security.demo.security.UserDetails;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class UserServiceImp implements UserService, UserDetailsService {
+//
+    private final UserDAO userDAO;
 
-    private final UserRepository userRepository;
 
     @Autowired
-    public UserServiceImp(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public UserServiceImp(UserDAO userDAO) {
+        this.userDAO = userDAO;
     }
 
     @Override
     @Transactional
     public void add(User user) {
         user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
-        userRepository.save(user);
+        userDAO.add(user);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<User> getList() {
-        return userRepository.findAll();
+        return userDAO.getList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public User findById(Long id) {
-        Optional<User> user = userRepository.findById(id);
+        Optional<User> user = Optional.ofNullable(userDAO.findById(id));
         if (user.isPresent()) {
             return user.get();
         } else {
@@ -50,14 +51,19 @@ public class UserServiceImp implements UserService, UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public User findUserByUsername (String username) {
-        return userRepository.findUserByUsername(username);
+        Optional<User> user = Optional.ofNullable(userDAO.findUserByUsername(username));
+        if (user.isPresent()) {
+            return user.get();
+        } else {
+            throw new UsernameNotFoundException(String.format("Пользователь с username '%s' не найден!", username));
+        }
     }
 
     @Override
     @Transactional
     public void delete(Long id) {
-        if (userRepository.findById(id).isPresent()) {
-            userRepository.deleteById(id);
+        if (Optional.ofNullable(userDAO.findById(id)).isPresent()) {
+            userDAO.delete(id);
         } else {
             throw new UsernameNotFoundException(String.format("Пользователь с id '%d' не найден!", id));
         }
@@ -66,27 +72,18 @@ public class UserServiceImp implements UserService, UserDetailsService {
     @Override
     @Transactional
     public void change(Long id, User user) {
-
-        User changedUser = userRepository.getReferenceById(id);
-        changedUser.setUsername(user.getUsername());
-        changedUser.setPassword(user.getPassword());
-        changedUser.setConfirmPassword(user.getConfirmPassword());
-        changedUser.setFirstName(user.getFirstName());
-        changedUser.setLastName(user.getLastName());
-        changedUser.setEmail(user.getEmail());
-        changedUser.setRoles(user.getRoles());
-
-        userRepository.save(changedUser);
+        user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
+        userDAO.change(id, user);
     }
+
 
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> user = Optional.ofNullable(userRepository.findUserByUsername(username));
-
+        Optional<User> user = Optional.ofNullable(userDAO.findUserByUsername(username));
         if (user.isEmpty()) {
             throw new UsernameNotFoundException(String.format("Пользователь '%s' не найден!", username));
         }
-        return new ru.kata.spring.boot_security.demo.security.UserDetails(user.get());
+        return user.get();
     }
 }

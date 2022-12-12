@@ -1,6 +1,7 @@
 package ru.kata.spring.boot_security.demo.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
@@ -19,6 +21,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @Controller
+@RequestMapping("/admin")
 public class AdminController {
     private final UserService userService;
     private final RoleService roleService;
@@ -29,65 +32,45 @@ public class AdminController {
         this.roleService = roleService;
     }
 
-    @GetMapping("/admin")
-    public String showAllUsers(Model model) {
+    @GetMapping("/panel")
+    public String showAllUsers(Model model, @AuthenticationPrincipal User user) {
         List<User> usersList = userService.getList();
         model.addAttribute("allUsers", usersList);
+        model.addAttribute("user", user);
+        model.addAttribute("newUser", new User());
+        model.addAttribute("roles", roleService.getRoles());
         return "admin";
     }
 
-    @GetMapping("/addNewUser")
-    public String createForm(@ModelAttribute("user") User user, Model model) {
-        model.addAttribute("roles", roleService.getRoles());
-        return "new";
-    }
-
-    @PostMapping("/addUser")
-    public String addUser(@ModelAttribute("newUser") @Valid User user, BindingResult bindingResult, Model model) {
+    @PostMapping()
+    public String addUser(@ModelAttribute("user") @Valid User newUser, BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("user", user);
+            model.addAttribute("user", newUser);
             model.addAttribute("roles", roleService.getRoles());
-            return "new";
-        } else if (!user.getPassword().equals(user.getConfirmPassword())) {
-            model.addAttribute("user", user);
-            model.addAttribute("roles", roleService.getRoles());
-            model.addAttribute("passwordError", "Пароли не совпадают");
-            return "new";
-        }
-        if (userService.findUserByUsername(user.getUsername()) != null) {
-            model.addAttribute("user", user);
-            model.addAttribute("roles", roleService.getRoles());
-            model.addAttribute("usernameError", "Пользователь с таким именем уже существует");
-            return "new";
+            return "admin";
         } else {
-            userService.add(user);
-            return "redirect:/admin";
+            userService.add(newUser);
+            return "redirect:/admin/panel";
         }
     }
 
-    @GetMapping("/{id}")
-    public String getUserById(Model model, @PathVariable(name = "id") Long id) {
-        model.addAttribute("user", userService.findById(id));
-        return "user";
-    }
-
-    @GetMapping("/change/{id}")
+    @GetMapping("/{id}/change")
     public String changeForm(Model model, @PathVariable(name = "id") Long id) {
         User user = userService.findById(id);
         model.addAttribute("user", user);
         model.addAttribute("roles", roleService.getRoles());
-        return "change";
+        return "admin";
     }
 
     @PatchMapping("/{id}")
     public String changeUser(@ModelAttribute("user") User user, @PathVariable("id") Long id) {
         userService.change(id, user);
-        return "redirect:/admin";
+        return "redirect:/admin/panel";
     }
 
-    @DeleteMapping("/deleteUser/{id}")
+    @DeleteMapping("/{id}")
     public String deleteUser(@PathVariable("id") Long id) {
         userService.delete(id);
-        return "redirect:/admin";
+        return "redirect:/admin/panel";
     }
 }

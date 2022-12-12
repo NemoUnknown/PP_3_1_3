@@ -8,7 +8,9 @@ import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Component
@@ -26,8 +28,8 @@ public class DBInit {
     public void initDB() {
         Role roleAdmin = new Role("ROLE_ADMIN");
         Role roleUser = new Role("ROLE_USER");
-        Set<Role> adminSet = new HashSet<>();
-        Set<Role> userSet = new HashSet<>();
+        List<Role> adminSet = new ArrayList<>();
+        List<Role> userSet = new ArrayList<>();
 
         roleService.addRole(roleAdmin);
         roleService.addRole(roleUser);
@@ -37,12 +39,10 @@ public class DBInit {
         userSet.add(roleUser);
 
         User admin = new User("admin", "admin",
-                "Иван", "Иванов",
-                "ivanoff@mail.ru", adminSet);
+                "Иван", "Иванов", adminSet);
 
         User user = new User("user", "user",
-                "Петр", "Петров",
-                "petr94@ya.ru", userSet);
+                "Петр", "Петров", userSet);
 
         userService.add(admin);
         userService.add(user);
