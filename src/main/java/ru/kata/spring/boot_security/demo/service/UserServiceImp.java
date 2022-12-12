@@ -72,7 +72,7 @@ public class UserServiceImp implements UserService, UserDetailsService {
     @Override
     @Transactional
     public void change(Long id, User user) {
-        user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
+        user.setPassword(findById(id).getPassword());
         userDAO.change(id, user);
     }
 

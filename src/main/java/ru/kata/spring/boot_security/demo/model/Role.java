@@ -9,9 +9,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Column;
 import javax.persistence.ManyToMany;
-import javax.persistence.Transient;
 
-import java.util.List;
 import java.util.Set;
 
 @Entity

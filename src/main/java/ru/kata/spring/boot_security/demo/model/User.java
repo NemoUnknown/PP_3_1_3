@@ -11,9 +11,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,13 +27,10 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotEmpty(message = "Введите логин")
-    @Size(min = 2, max = 255, message = "Логин должен быть не менее 2-х символов")
     @Column(name = "username")
     private String username;
 
     @Column(name = "password")
-    @Size(min = 4, message = "Пароль должен быть не менее 4-х знаков")
     private String password;
 
     @Column(name = "first_name")

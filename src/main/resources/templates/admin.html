@@ -75,13 +75,13 @@
                                             <td th:utext="${user.getLastName()}">...</td>
                                             <td th:utext="${user.getUsername()}">...</td>
                                             <td>
-                                                <button type="button" class="btn btn-info" data-toggle="modal" th:data-target="${'#user' + user.getId()}" th:data-row="${user}">Edit</button>
+                                                <button type="button" class="btn btn-info" data-toggle="modal" th:data-target="${'#editUser' + user.getId()}" th:data-row="${user}">Edit</button>
 
                                                 <!--Модальное окно для редактирования-->
-                                                <div class="modal fade" th:id="${'user' + user.getId()}" tabindex="-1" role="dialog" aria-labelledby="edit" aria-hidden="true">
+                                                <div class="modal fade" th:id="${'editUser' + user.getId()}" tabindex="-1" role="dialog" aria-labelledby="edit" aria-hidden="true">
                                                     <div class="modal-dialog" role="document">
                                                         <div class="modal-content">
-                                                            <form th:method="PATCH" th:action="@{/admin/{id}(id=${user.getId()})}" th:object="${user}" id="${'changeForm' + person.getId()}">
+                                                            <form th:method="PATCH" th:action="@{/admin/panel/{id}(id=${user.getId()})}" th:object="${user}" id="${'changeForm' + user.getId()}">
                                                                 <div class="modal-header">
                                                                     <h5 class="modal-title">Edit user</h5>
                                                                     <button type="button" class="close" data-dismiss="modal">x</button>

@@ -18,7 +18,7 @@ public class RoleServiceImp implements RoleService {
     }
 
     @Override
-    @Transactional
+    @Transactional (readOnly = true)
     public List<Role> getRoles() {
         return roleDAO.getRoles();
     }
@@ -30,7 +30,13 @@ public class RoleServiceImp implements RoleService {
     }
 
     @Override
-    @Transactional
+    @Transactional (readOnly = true)
+    public  Role getRoleByName(String name) {
+        return roleDAO.getRoleByName(name);
+    }
+
+    @Override
+    @Transactional (readOnly = true)
     public List<Role> listByRole(List<String> name) {
         return roleDAO.listByName(name);
     }

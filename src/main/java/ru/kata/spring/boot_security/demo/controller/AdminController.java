@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,12 +12,15 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
-import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
 
 @Controller
 @RequestMapping("/admin")
@@ -34,8 +36,7 @@ public class AdminController {
 
     @GetMapping("/panel")
     public String showAllUsers(Model model, @AuthenticationPrincipal User user) {
-        List<User> usersList = userService.getList();
-        model.addAttribute("allUsers", usersList);
+        model.addAttribute("allUsers", userService.getList());
         model.addAttribute("user", user);
         model.addAttribute("newUser", new User());
         model.addAttribute("roles", roleService.getRoles());
@@ -43,27 +44,21 @@ public class AdminController {
     }
 
     @PostMapping()
-    public String addUser(@ModelAttribute("user") @Valid User newUser, BindingResult bindingResult, Model model) {
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("user", newUser);
-            model.addAttribute("roles", roleService.getRoles());
-            return "admin";
-        } else {
-            userService.add(newUser);
-            return "redirect:/admin/panel";
-        }
+    public String addUser(@ModelAttribute("user") User user) {
+        user.setRoles(getRoles(user));
+        userService.add(user);
+        return "redirect:/admin/panel";
     }
 
-    @GetMapping("/{id}/change")
+    @GetMapping("/panel/{id}/change")
     public String changeForm(Model model, @PathVariable(name = "id") Long id) {
-        User user = userService.findById(id);
-        model.addAttribute("user", user);
-        model.addAttribute("roles", roleService.getRoles());
+        model.addAttribute("editUser", userService.findById(id));
         return "admin";
     }
 
-    @PatchMapping("/{id}")
-    public String changeUser(@ModelAttribute("user") User user, @PathVariable("id") Long id) {
+    @PatchMapping("/panel/{id}")
+    public String changeUser(@ModelAttribute("editUser") User user, @PathVariable("id") Long id) {
+        user.setRoles(getRoles(user));
         userService.change(id, user);
         return "redirect:/admin/panel";
     }
@@ -72,5 +67,18 @@ public class AdminController {
     public String deleteUser(@PathVariable("id") Long id) {
         userService.delete(id);
         return "redirect:/admin/panel";
+    }
+
+    private List<Role> getRoles(User user) {
+        List<Role> roleList = user.getRoles();
+        Optional<Role> roleUser = Optional.ofNullable(roleService.getRoleByName("ROLE_USER"));
+
+        if((roleList == null) || (roleList.isEmpty()) ) {
+            roleList = new ArrayList<>();
+            roleList.add(roleUser.orElse(new Role("ROLE_USER")));
+        } else if ((roleList.size() == 1) && (roleList.get(0).getRoleName().equals("ROLE_ADMIN"))) {
+            roleList.add(roleUser.orElse(new Role("ROLE_USER")));
+        }
+        return roleList;
     }
 }
