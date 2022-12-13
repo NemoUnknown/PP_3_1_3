@@ -76,7 +76,6 @@ public class UserServiceImp implements UserService, UserDetailsService {
         userDAO.change(id, user);
     }
 
-
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -86,4 +85,6 @@ public class UserServiceImp implements UserService, UserDetailsService {
         }
         return user.get();
     }
+
+
 }

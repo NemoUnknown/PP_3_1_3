@@ -45,7 +45,7 @@ public class AdminController {
 
     @PostMapping()
     public String addUser(@ModelAttribute("user") User user) {
-        user.setRoles(getRoles(user));
+        user.setRoles(roleService.getCurrentRoles(user));
         userService.add(user);
         return "redirect:/admin/panel";
     }
@@ -58,7 +58,7 @@ public class AdminController {
 
     @PatchMapping("/panel/{id}")
     public String changeUser(@ModelAttribute("editUser") User user, @PathVariable("id") Long id) {
-        user.setRoles(getRoles(user));
+        user.setRoles(roleService.getCurrentRoles(user));
         userService.change(id, user);
         return "redirect:/admin/panel";
     }
@@ -69,16 +69,4 @@ public class AdminController {
         return "redirect:/admin/panel";
     }
 
-    private List<Role> getRoles(User user) {
-        List<Role> roleList = user.getRoles();
-        Optional<Role> roleUser = Optional.ofNullable(roleService.getRoleByName("ROLE_USER"));
-
-        if((roleList == null) || (roleList.isEmpty()) ) {
-            roleList = new ArrayList<>();
-            roleList.add(roleUser.orElse(new Role("ROLE_USER")));
-        } else if ((roleList.size() == 1) && (roleList.get(0).getRoleName().equals("ROLE_ADMIN"))) {
-            roleList.add(roleUser.orElse(new Role("ROLE_USER")));
-        }
-        return roleList;
-    }
 }
